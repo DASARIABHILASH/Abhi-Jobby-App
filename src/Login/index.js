@@ -4,25 +4,37 @@ import {Component} from 'react'
 import './index.css'
 
 class Login extends Component {
-  state = {password: '', username: ''}
+  state = {password: '', username: '', ischecking: false, error: ''}
+
+  success = jwtToken => {
+    const {history} = this.props
+    this.setState({ischecking: false})
+    Cookies.set('jwt_token', jwtToken, {expires: 30, path: '/'})
+    history.replace('/')
+  }
+
+  failure = errorMsg => {
+    this.setState({ischecking: true, error: errorMsg})
+  }
 
   submit = async event => {
     event.preventDefault()
     const {username, password} = this.state
-    const details = {username: username, password: password}
+    const details = {username, password}
     const url = 'https://apis.ccbp.in/login'
+
     const options = {
       method: 'POST',
-
       body: JSON.stringify(details),
     }
+
     const response = await fetch(url, options)
     const data = await response.json()
 
     if (response.ok) {
-      console.log('success')
+      this.success(data.jwt_token)
     } else {
-      console.log('failure')
+      this.failure(data.error_msg)
     }
     this.setState({username: '', password: ''})
   }
@@ -36,7 +48,12 @@ class Login extends Component {
   }
 
   render() {
-    const {username, password} = this.state
+    const {username, password, ischecking, error} = this.state
+    const jwtToken = Cookies.get('jwt_token')
+
+    if (jwtToken !== undefined) {
+      return <Redirect to="/" />
+    }
 
     return (
       <div className="loginDiv1">
@@ -68,6 +85,7 @@ class Login extends Component {
             onChange={this.functionInput2}
             value={password}
           />
+          {ischecking && <p className="p">*{error}</p>}
           <button className="Loginbtn1" type="submit">
             Login
           </button>

@@ -1,0 +1,50 @@
+.HomeDiv1 {
+  width: 100%;
+  min-height: 100vh;
+  background-image: url('https://assets.ccbp.in/frontend/react-js/home-lg-bg.png');
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin: 0px;
+  flex-direction: column;
+  background-size: cover;
+  background-position: center;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+}
+.HomeDiv2 {
+  width: 460px;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  margin: 50px;
+  flex-direction: column;
+}
+.HomeP1 {
+  font-size: 15px;
+  color: #f8fafc;
+  font-weight: 300;
+  font-family: Roboto;
+  padding: 10px;
+}
+
+.HomeH1 {
+  font-size: 49px;
+  color: #ffffff;
+  font-weight: 700;
+  font-family: Roboto;
+}
+.Homebutton1 {
+  font-size: 13px;
+  color: rgb(255, 255, 255);
+  font-weight: 400;
+  font-family: Roboto;
+  background-color: rgb(61, 61, 247);
+  border: none;
+  border-radius: 5px;
+  width: 100px;
+  height: 40px;
+}
