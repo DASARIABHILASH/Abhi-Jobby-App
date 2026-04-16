@@ -18,17 +18,27 @@ const Header = props => {
           className="HeaderJobbyweblogo1"
         />
       </Link>
-      <div className="HeaderDiv2">
-        <Link to="/" className="Headerlink1">
-          <h1 className="Headerheading1">Home</h1>
-        </Link>
-        <Link to="/jobs" className="Headerlink1">
-          <h1 className="Headerheading1">Jobs</h1>
-        </Link>
-      </div>
-      <button className="Headerlogout1" type="button" onClick={Headerlogout}>
-        Logout
-      </button>
+      <ul className="HeaderDiv2">
+        <li className="link">
+          <Link to="/" className="Headerlink1">
+            <h1 className="Headerheading1 ">Home</h1>
+          </Link>
+        </li>
+        <li className="link">
+          <Link to="/jobs" className="Headerlink1">
+            <h1 className="Headerheading1 ">Jobs</h1>
+          </Link>
+        </li>
+        <li>
+          <button
+            className="Headerlogout1"
+            type="button"
+            onClick={Headerlogout}
+          >
+            Logout
+          </button>
+        </li>
+      </ul>
     </nav>
   )
 }

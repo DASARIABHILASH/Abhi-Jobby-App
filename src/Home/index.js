@@ -1,6 +1,6 @@
 import './index.css'
 
-import {withRouter} from 'react-router-dom'
+import {Link, withRouter} from 'react-router-dom'
 import Header from '../Header'
 
 const Home = props => {
@@ -15,14 +15,14 @@ const Home = props => {
       <div className="HomeDiv2">
         <h1 className="HomeH1">Find The Job That Fits Your Life</h1>
         <p className="HomeP1">
-          Millions of people are searching for here this is good platfom for to
-          get a job very fast and easy way of an it people are searching for
-          here this is good platfom
+          <p>
+            Millions of people are searching for jobs. This is a good
+            platform...
+          </p>
         </p>
-
-        <button className="Homebutton1" onClick={HomeJobs}>
-          Find Jobs
-        </button>
+        <Link to="/jobs" className="link">
+          <button className="Homebutton1">Find Jobs</button>
+        </Link>
       </div>
     </div>
   )

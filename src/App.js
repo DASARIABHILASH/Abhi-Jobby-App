@@ -47,21 +47,23 @@ const salaryRangesList = [
 
 // Replace your code here
 const App = () => (
-  <Switch>
-    <Route exact path="/login" component={Login} />
-    <ProtectedRoute exact path="/" component={Home} />
-    <ProtectedRoute
-      exact
-      path="/jobs"
-      component={Jobs}
-      employmentData={employmentTypesList}
-      salaryData={salaryRangesList}
-    />
-    <ProtectedRoute exact path="/jobs/:id" component={JobItem} />
+  <div className="black">
+    <Switch>
+      <Route exact path="/login" component={Login} />
+      <ProtectedRoute exact path="/" component={Home} />
+      <ProtectedRoute
+        exact
+        path="/jobs"
+        component={Jobs}
+        employmentData={employmentTypesList}
+        salaryData={salaryRangesList}
+      />
+      <ProtectedRoute exact path="/jobs/:id" component={JobItem} />
 
-    <Route exact path="/not-found" component={NotFound} />
-    <Redirect to="/not-found" />
-  </Switch>
+      <Route exact path="/not-found" component={NotFound} />
+      <Redirect to="not-found" />
+    </Switch>
+  </div>
 )
 
 export default App

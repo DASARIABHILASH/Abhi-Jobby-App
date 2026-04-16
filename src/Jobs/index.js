@@ -1,11 +1,10 @@
-import {BsSearch, BsGeoAlt, BsFillStarFill} from 'react-icons/bs'
 import {Link} from 'react-router-dom'
 import {Component} from 'react'
 import Cookies from 'js-cookie'
+import {BsGeoAlt, BsSearch, BsFillStarFill} from 'react-icons/bs'
 import {MdLocalPostOffice} from 'react-icons/md'
 import Loader from 'react-loader-spinner'
 import Header from '../Header'
-
 import './index.css'
 
 const constantCheck2 = {
@@ -15,7 +14,14 @@ const constantCheck2 = {
   process: 'PROCESS',
 }
 class Jobs extends Component {
-  state = {profile: {}, jobs: [], api2: constantCheck2.initial, load: true}
+  state = {
+    profile: {},
+    jobs: [],
+    api2: constantCheck2.initial,
+    searchInput: '',
+    activeEmployeeId: [],
+    activesalaryId: '',
+  }
 
   componentDidMount() {
     this.getData1()
@@ -31,20 +37,27 @@ class Jobs extends Component {
         Authorization: `Bearer ${jwtToken}`,
       },
     }
-    this.setState({api2: constantCheck2.process})
     const response = await fetch(url, options)
-    const data = await response.json()
-    const newobj1 = {
-      profileDetails: data.profile_details.name,
-      profileimageUrl: data.profile_details.profile_image_url,
-      shortBio: data.profile_details.short_bio,
+    if (response.ok) {
+      const data = await response.json()
+      const newobj1 = {
+        profileDetails: data.profile_details.name,
+        profileImageUrl: data.profile_details.profile_image_url,
+        shortBio: data.profile_details.short_bio,
+      }
+      this.setState({profile: newobj1})
+    } else {
+      this.setState({profile: constantCheck2.failure})
     }
-    this.setState({profile: newobj1})
   }
 
   getData2 = async () => {
     const jwtToken = Cookies.get('jwt_token')
-    const url = 'https://apis.ccbp.in/jobs'
+    this.setState({api2: constantCheck2.process})
+    const {activeEmployeeId, activesalaryId, searchInput} = this.state
+    const url = `https://apis.ccbp.in/jobs?employment_type=${activeEmployeeId.join(
+      ',',
+    )}&minimum_package=${activesalaryId}&search=${searchInput}`
     const options = {
       method: 'GET',
       headers: {
@@ -61,47 +74,92 @@ class Jobs extends Component {
         employmentType: each.employment_type,
         jobDescription: each.job_description,
         location: each.location,
-        packageanul: each.package_per_annum,
+        packagePerAnnum: each.package_per_annum,
         title: each.title,
         rating: each.rating,
         id: each.id,
       }))
-      this.setState({jobs: newobj2, api2: constantCheck2.success, load: false})
+      this.setState({jobs: newobj2, api2: constantCheck2.success})
     } else {
-      this.setState({api2: constantCheck2.failure, load: true})
+      this.setState({api2: constantCheck2.failure})
     }
+  }
+
+  search = event => {
+    this.setState({searchInput: event.target.value})
+  }
+
+  radio = id => {
+    this.setState({activesalaryId: id}, this.getData2)
+    console.log(id)
+  }
+
+  checkbox = updated2 => {
+    this.setState(prevState => {
+      const isExist = prevState.activeEmployeeId.includes(updated2)
+
+      if (isExist) {
+        return {
+          activeEmployeeId: prevState.activeEmployeeId.filter(
+            each => each !== updated2,
+          ),
+        }
+      }
+      return {
+        activeEmployeeId: [...prevState.activeEmployeeId, updated2],
+      }
+    }, this.getData2)
+  }
+
+  retry1 = () => {
+    this.getData1()
+  }
+
+  retry2 = () => {
+    this.getData2()
   }
 
   div3 = () => {
     const {salaryData, employmentData} = this.props
-    const {profile, load} = this.state
+    const {profile, activeEmployeeId, activesalaryId} = this.state
 
     return (
       <div className="JobDiv3">
-        {load ? (
-          <div className="JobDiv6">
-            <div>
-              <img
-                src={profile.profileimageUrl}
-                className="Jobprofile"
-                alt="profile"
-              />
-              <h1 className="JobDivh1">{profile.profileDetails}</h1>
-              <p className="JobDivp1">{profile.shortBio}</p>
-            </div>
-          </div>
+        {profile === constantCheck2.failure ? (
+          <button type="button" onClick={this.retry1}>
+            Retry
+          </button>
         ) : (
-          <div className="JobError1">
-            <button className="JobLogout2">Retry</button>
-          </div>
+          profile.profileDetails && (
+            <div className="JobDiv6">
+              <div>
+                <img
+                  src={profile.profileImageUrl}
+                  className="Jobprofile"
+                  alt="profile"
+                />
+                <h1 className="JobDivh1">{profile.profileDetails}</h1>
+                <p className="JobDivp1">{profile.shortBio}</p>
+              </div>
+            </div>
+          )
         )}
+
         <hr className="JobHr1" />
         <h1 className="JobH1">Type of Employment</h1>
         <ul className="Jobul1">
           {employmentData.map(each => (
             <li key={each.employmentTypeId} className="Jobli">
-              <input type="checkbox" />
-              <h1 className="JobP1">{each.label}</h1>
+              <input
+                type="checkbox"
+                name="employe"
+                checked={activeEmployeeId.includes(each.employmentTypeId)}
+                id={each.employmentTypeId}
+                onChange={() => this.checkbox(each.employmentTypeId)}
+              />
+              <label htmlFor={each.employmentTypeId} className="JobP1">
+                {each.label}
+              </label>
             </li>
           ))}
         </ul>
@@ -110,8 +168,16 @@ class Jobs extends Component {
         <ul className="Jobul2">
           {salaryData.map(each => (
             <li key={each.salaryRangeId} className="Jobli">
-              <input type="radio" />
-              <h1 className="JobP1">{each.label}</h1>
+              <input
+                type="radio"
+                name="salary"
+                id={each.salaryRangeId}
+                checked={activesalaryId === each.salaryRangeId}
+                onChange={() => this.radio(each.salaryRangeId)}
+              />
+              <label htmlFor={each.salaryRangeId} className="JobP1">
+                {each.label}
+              </label>
             </li>
           ))}
         </ul>
@@ -120,24 +186,15 @@ class Jobs extends Component {
   }
 
   div4 = () => {
-    const {jobs, load} = this.state
+    const {jobs} = this.state
+    const p = jobs.length
     return (
       <div className="JobDiv4">
-        <div className="SearchDiv1">
-          <input type="search" className="SearchInput1" placeholder="Search" />
-          <button
-            type="button"
-            data-testid="searchButton"
-            className="searchButton"
-          >
-            <BsSearch className="searchicon" />
-          </button>
-        </div>
-        {load ? (
+        {p > 0 ? (
           <ul className="JobDivul">
             {jobs.map(each => (
-              <Link to={`/jobs/${each.id}`} className="JobLink">
-                <li key={each.id} className="JobDivli">
+              <Link to={`/jobs/${each.id}`} className="JobLink" key={each.id}>
+                <li className="JobDivli">
                   <div className="JobDivli1">
                     <img
                       src={each.companyLogoUrl}
@@ -164,7 +221,7 @@ class Jobs extends Component {
                         <p className="JobDivlip2">{each.employmentType}</p>
                       </div>
                     </div>
-                    <h1 className="JobDivlih1">{each.packageanul}</h1>
+                    <h1 className="JobDivlih1">{each.packagePerAnnum}</h1>
                   </div>
                   <hr className="JobHr2" />
                   <div>
@@ -176,15 +233,16 @@ class Jobs extends Component {
             ))}
           </ul>
         ) : (
-          <div className="JobError2 ">
+          <div className="DivNotFound ">
             <img
-              src="https://assets.ccbp.in/frontend/react-js/failure-img.png"
-              alt="failure view"
-              className="JobErrorlogo"
+              src="https://assets.ccbp.in/frontend/react-js/no-jobs-img.png"
+              alt="no jobs"
+              className="JobErrorlogo5"
             />
-            <h1 className="JobDivErrorH1">Oops! Something Went Wrong</h1>
-            <p className="JobDivErrorP1">We cant seen the page loading on it</p>
-            <button className="JobLogout2">Retry</button>
+            <h1 className="JobDivErroH1">No Jobs Found</h1>
+            <p className="JobDivErrorP1">
+              We could not find any jobs Try other filters
+            </p>
           </div>
         )}
       </div>
@@ -192,38 +250,44 @@ class Jobs extends Component {
   }
 
   process2 = () => (
-    <div>
+    <div className="load">
       <div className="loader-container" data-testid="loader">
         <Loader type="ThreeDots" color="#ffffff" height="50" width="50" />
       </div>
     </div>
   )
 
-  failure2 = () => {
-    console.log('fail')
-    return (
-      <div>
-        <h1>Failure</h1>
-      </div>
-    )
-  }
+  failure2 = () => (
+    <div className="JobError2 ">
+      <img
+        src="https://assets.ccbp.in/frontend/react-js/failure-img.png"
+        alt="failure view"
+        className="JobErrorlogo"
+      />
+      <h1 className="JobDivErrorH1">Oops! Something Went Wrong</h1>
+      <p className="JobDivErrorP1">
+        We cannot seem to find the page you are looking for
+      </p>
+      <button className="JobLogout2" type="button" onClick={this.retry2}>
+        Retry
+      </button>
+    </div>
+  )
 
-  success2 = () => {
-    const {jobItemList} = this.state
-    console.log(jobItemList)
-    return (
-      <div className="JobDiv2">
-        {this.div3()}
-        {this.div4()}
-      </div>
-    )
-  }
+  // success2 = () => {
+  //   return (
+  //     <div className="JobDiv2">
+  //       {this.div3()}
+  //       {this.div4()}
+  //     </div>
+  //   )
+  // }
 
   switch = () => {
     const {api2} = this.state
     switch (api2) {
       case constantCheck2.success:
-        return this.success2()
+        return this.div4()
       case constantCheck2.failure:
         return this.failure2()
       case constantCheck2.process:
@@ -233,11 +297,61 @@ class Jobs extends Component {
     }
   }
 
+  // render() {
+  //   const {searchInput} = this.state
+  //   return (
+  //     <div className="JobDiv1 ">
+  //       <Header />
+  //       <div className="SearchDiv1">
+  //         <input
+  //           type="search"
+  //           className="SearchInput1"
+  //           value={searchInput}
+  //           placeholder="Search"
+  //           onChange={this.search}
+  //         />
+  //         <button
+  //           type="button"
+  //           data-testid="searchButton"
+  //           className="searchButton"
+  //           onClick={this.getData2}
+  //         >
+  //           <BsSearch className="searchicon" />
+  //         </button>
+  //       </div>
+  //       {this.switch()}
+  //     </div>
   render() {
+    const {searchInput} = this.state
+
     return (
-      <div className="JobDiv1 ">
+      <div className="JobDiv1">
         <Header />
-        {this.switch()}
+        <div className="JobDiv2">
+          {this.div3()}
+
+          <div>
+            <div className="SearchDiv1">
+              <input
+                type="search"
+                className="SearchInput1"
+                value={searchInput}
+                placeholder="Search"
+                onChange={this.search}
+              />
+              <button
+                type="button"
+                data-testid="searchButton"
+                className="searchButton"
+                onClick={this.getData2}
+              >
+                <BsSearch className="searchicon" />
+              </button>
+            </div>
+
+            {this.switch()}
+          </div>
+        </div>
       </div>
     )
   }

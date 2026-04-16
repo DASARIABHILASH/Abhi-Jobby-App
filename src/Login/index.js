@@ -85,7 +85,7 @@ class Login extends Component {
             onChange={this.functionInput2}
             value={password}
           />
-          {ischecking && <p className="p">*{error}</p>}
+          {ischecking && <p className="p1">*{error}</p>}
           <button className="Loginbtn1" type="submit">
             Login
           </button>
